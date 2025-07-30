@@ -1,0 +1,94 @@
+import {Product} from "../models/Product.models.js";
+import multer from "multer";
+import {Firm } from "../models/Firm.models.js";
+import fs from "fs";
+
+const uploadDir = './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+
+// Multer configuration
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir); // Where to store uploaded files
+  },
+  filename: function (req, file, cb) {
+    // Rename file: e.g., 1719462145000-myimage.jpg
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+const addProduct = async(req,res) =>{
+    try {
+        const{productName,price,category,bestSeller,description} = req.body;
+    
+        const image = req.file ? req.file.filename : undefined;
+
+        const firmId= req.params.firmId;
+        const firm= await Firm.findById(firmId);
+
+        if(!firm){
+            return res.status(404).json({error:"Firm not found"})
+        }
+
+        const product = new Product({
+            productName,price,category,bestSeller,description,image,firm:firm._id
+            
+        })
+
+        const savedProduct = await product.save();
+        firm.products.push(savedProduct);
+
+
+        await firm.save()
+
+        res.status(200).json(savedProduct)
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({error:"Internal server error"})
+        
+    }
+}
+
+const getProductByFirm = async(req,res) =>{
+  try {
+    const firmId = req.params.firmId;
+    const firm = await Firm.findById(firmId);
+
+    if(!firm){
+      return res.status(404).json({error:"firm not found"})
+    }
+    const resturantName = firm.firmName
+    const products = await Product.find({firm:firmId})
+
+    res.status(200).json({resturantName,products})
+    
+  } catch (error) {
+    console.error(error)
+        res.status(500).json({error:"Internal server error"})
+    
+  }
+}
+
+const deleteProductById = async(req, res) => {
+    try {
+        const productId = req.params.productId;
+
+        const deletedProduct = await Product.findByIdAndDelete(productId);
+
+        if (!deletedProduct) {
+            return res.status(404).json({ error: "No product found" })
+        }
+        res.status(200).json({ message: "Product deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" })
+    }
+}
+
+export { addProduct, upload,getProductByFirm,deleteProductById };
