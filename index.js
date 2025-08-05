@@ -6,30 +6,29 @@ import bodyParser from "body-parser";
 import firmRoutes from "./routes/firmRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import path from "path";
+import cors from "cors";
 
+dotenv.config({ path: "./.env" });
 
-
-dotenv.config({ path: './.env' });
-
-
-const app=express();
+const app = express();
 const PORT = process.env.PORT || 4000;
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("database connected successfully"))
   .catch((error) => console.log(error));
 
-app.use(bodyParser.json())
-app.use("/vendor",vendorRoutes)
-app.use("/firm",firmRoutes)
-app.use("/product",productRoutes)
-app.use("/uploads",express.static("uploads"))
+app.use(cors);
+app.use(bodyParser.json());
+app.use("/vendor", vendorRoutes);
+app.use("/firm", firmRoutes);
+app.use("/product", productRoutes);
+app.use("/uploads", express.static("uploads"));
 
+app.listen(PORT, () => {
+  console.log(`Server started listening on port number ${PORT}`);
+});
 
-app.listen(PORT,()=>{
-    console.log(`Server started listening on port number ${PORT}`)
-})
-
-app.use('/',(req,res)=>{
-    res.send("<h1>Welcome to Suby</h1>")
-})
+app.use("/", (req, res) => {
+  res.send("<h1>Welcome to Suby</h1>");
+});
