@@ -29,6 +29,6 @@ const productSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Firm"
   }
-});
+}, { timestamps: true });
 
 export const Product = mongoose.model("Product", productSchema);

@@ -1,6 +1,7 @@
 import { vendorRegister,vendorLogin, getAllVendors, getVendorById } from "../controllers/vendorController.js";
 import { Router } from "express";
 
+
 const router = Router();
 
 router.route("/register").post(vendorRegister);

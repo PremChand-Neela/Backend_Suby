@@ -10,29 +10,37 @@ const vendorRegister = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    const vendorEmail = await Vendor.findOne({ email });
-    if (vendorEmail) {
-      return res.status(400).json("email already taken")
+    // Validate required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    console.log(email);
+
+    // Check if email is already registered
+    const existingVendor = await Vendor.findOne({ email });
+    if (existingVendor) {
+      return res.status(400).json({ message: "Email already taken" });
     }
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create and save the new vendor
     const newVendor = new Vendor({
       username,
       email,
-      password: hashedPassword
-    })
+      password: hashedPassword,
+    });
     await newVendor.save();
 
-    res.status(201).json({ message: "Vendor registerd successfully" });
-    console.log("registerd")
+    console.log("Vendor registered:", newVendor._id);
+    res.status(201).json({ message: "Vendor registered successfully" });
+
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" })
-
+    console.error("Registration Error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-}
+};
 
 
 
@@ -89,7 +97,7 @@ const getAllVendors = async (req, res) => {
       return res.status(404).json({ message: "No vendors found" });
     }
 
-    res.json({ vendors });
+    return res.status(200).json({ vendors });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
@@ -101,12 +109,12 @@ const getVendorById = async(req,res) =>{
   try {
     const vendor = await Vendor.findById(vendorId).populate('firm');
     if(!vendor){
-      res.status(400).json({error:"Vendor not found"})
+      return res.status(404).json({error:"Vendor not found"})
     }
     res.status(200).json({vendor})
   } catch (error) {
     console.error(error);
-    return res.status(500).json({error:"Internal sever error"})
+    return res.status(500).json({error:"Internal server error"})
     
   }
 }

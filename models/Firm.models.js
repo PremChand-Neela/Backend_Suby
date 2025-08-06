@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const firmSchema = new mongoose.Schema({
   firmName: {
     type: String,
-    require: true,
+    required: true,
     unique: true,
   },
   area: {
     type: String,
-    require: true,
+    required: true,
   },
   category: {
     type: [
@@ -44,7 +44,7 @@ const firmSchema = new mongoose.Schema({
       ref: "Product",
     },
   ],
-});
+}, { timestamps: true });
 
 
 export const Firm = mongoose.model("Firm",firmSchema)

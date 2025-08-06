@@ -2,6 +2,7 @@ import { Vendor } from "../models/Vendor.models.js";
 import { Firm } from "../models/Firm.models.js";
 import multer from 'multer';
 import fs from 'fs';
+import path from 'path';
 
 const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
@@ -29,7 +30,7 @@ const addFirm = async (req, res) => {
 
     const vendor = await Vendor.findById(req.vendorId);
     if (!vendor) {
-      res.status(404).json({ message: "Vendor is not found" })
+      return res.status(404).json({ message: "Vendor is not found" })
     }
 
     const firm = new Firm({
@@ -37,7 +38,7 @@ const addFirm = async (req, res) => {
     })
 
     const savedFirm= await firm.save();
-    vendor.firm.push(savedFirm);
+    vendor.firm.push(savedFirm._id);
     await vendor.save();
 
     return res.status(200).json({ message: "Firm added successfully" })
@@ -53,11 +54,13 @@ const deleteFirmById = async(req, res) => {
     try {
         const firmId = req.params.firmId;
 
-        const deletedProduct = await Firm.findByIdAndDelete(firmId);
+        const deletedFirm = await Firm.findByIdAndDelete(firmId);
 
-        if (!deletedProduct) {
+        if (!deletedFirm) {
             return res.status(404).json({ error: "No product found" })
         }
+
+        return res.status(200).json({ message: "Firm deleted successfully" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" })

@@ -2,6 +2,8 @@ import {Product} from "../models/Product.models.js";
 import multer from "multer";
 import {Firm } from "../models/Firm.models.js";
 import fs from "fs";
+import path from "path";
+
 
 const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
@@ -41,7 +43,7 @@ const addProduct = async(req,res) =>{
         })
 
         const savedProduct = await product.save();
-        firm.products.push(savedProduct);
+        firm.products.push(savedProduct._id);
 
 
         await firm.save()
